@@ -1,6 +1,6 @@
 Revision history for Perl extension Simulation::Automate (was Simulation::Tools::SynSim).
 
-0.9.6  Thu Sep  4 10:56:45 BST 2003
+0.9.7  Thu Sep  4 10:56:45 BST 2003
 	- Fixed a bug in the expression handling: now > and < are supported as well
 	- Fixed a bug in the from;to;step-style construct
 	- Fixed remote host checking

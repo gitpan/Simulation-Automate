@@ -8,6 +8,8 @@
 use Test;
 BEGIN { plan tests => 1 };
 use Simulation::Automate;
+system("ln -s ./blib/lib/Simulation .");
 chdir "eg";
 ok(&synsim("test.data"));
+system("rm -f ../Simulation")
 

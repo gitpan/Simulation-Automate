@@ -1,7 +1,7 @@
 package Simulation::Automate;
 
 use vars qw( $VERSION );
-$VERSION = "0.9.6";
+$VERSION = "0.9.7";
 
 #################################################################################
 #                                                                              	#
