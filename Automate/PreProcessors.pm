@@ -1,7 +1,7 @@
 package Simulation::Automate::PreProcessors;
 
 use vars qw( $VERSION );
-$VERSION = "1.0.0";
+$VERSION = "1.0.1";
 
 ################################################################################
 #                                                                              #
@@ -11,14 +11,14 @@ $VERSION = "1.0.0";
 #                                                                              #
 ################################################################################
 
-=headers
+#=headers
 
-Module to support SynSim simulation automation tool.
-This module contains all subroutines needed for preprocessing of the raw simulations results before handing them over to the postprocessor.
+#Module to support SynSim simulation automation tool.
+#This module contains all subroutines needed for preprocessing of the raw simulations results before handing them over to the postprocessor.
 
-$Id: PreProcessors.pm,v 1.2 2003/09/04 09:54:19 wim Exp $
+#$Id$
 
-=cut
+#=cut
 
 use strict;
 use Cwd;

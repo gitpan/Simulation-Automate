@@ -1,7 +1,7 @@
 package Simulation::Automate::Analysis;
 
 use vars qw( $VERSION );
-$VERSION = "1.0.0";
+$VERSION = "1.0.1";
 
 #################################################################################
 #                                                                              	#
@@ -11,16 +11,16 @@ $VERSION = "1.0.0";
 #                                                                              	#
 #################################################################################
 
-=headers
+#=headers
 
-Package for statistical analysis of SynSim results.
-Based on create_histograms.pl
-This is not finished by far, but already useful.
-This module is used by SynSim.pm and PostProcessors.pm
+#Package for statistical analysis of SynSim results.
+#Based on create_histograms.pl
+#This is not finished by far, but already useful.
+#This module is used by SynSim.pm and PostProcessors.pm
 
-$Id: Analysis.pm,v 1.1 2003/08/14 10:51:39 wim Exp $
+#$Id$
 
-=cut
+#=cut
 
 use strict;
 use Carp;

@@ -1,7 +1,7 @@
 package Simulation::Automate::PostProcLib;
 
 use vars qw( $VERSION );
-$VERSION = "1.0.0";
+$VERSION = "1.0.1";
 
 ################################################################################
 #                                                                              #
@@ -11,26 +11,26 @@ $VERSION = "1.0.0";
 #                                                                              #
 ################################################################################
 
-=headers
+#=headers
 
-Module to support synsim script for simulation automation.
-This module contains a set of utility functions for use in the
-PostProcessors.pm module.
-This module is generic.
+#Module to support synsim script for simulation automation.
+#This module contains a set of utility functions for use in the
+#PostProcessors.pm module.
+#This module is generic.
 
-$Id: PostProcLib.pm,v 1.2 2003/09/04 09:54:19 wim Exp $
+#$Id$
 
-=cut
+#=cut
+
 use warnings;
 use strict;
 use Carp;
-#use FileHandle;
 use Exporter;
 use lib '.','..';
 
 use Simulation::Automate::Analysis;
 use Simulation::Automate::Dictionary;
-#use Simulation::Automate::PostProcessors;
+
 @Simulation::Automate::PostProcLib::ISA = qw(Exporter);
 @Simulation::Automate::PostProcLib::EXPORT = qw(
 						&prepare_plot
@@ -118,10 +118,12 @@ sub prepare {
 
   my $setvar=$synsimdata{SETVAR}||'';
   if(exists $synsimdata{COND} or exists $synsimdata{CONDITION}) {
-    my $condvar= $synsimdata{CONDVAR}||$synsimdata{SWEEPVAR}||'none';
-    $synsimdata{CONDVAR}=$synsimdata{SWEEPVAR}=$condvar;
-    my $xvar= $synsimdata{XVAR}|| $synsimdata{SETVAR}||'';
-    $synsimdata{XVAR}=$synsimdata{SETVAR}=$xvar;
+#    my $condvar= $synsimdata{CONDVAR}||$synsimdata{SWEEPVAR}||'none';
+#WV 010704: only CONDVAR, not SWEEPVAR
+    my $condvar= $synsimdata{CONDVAR}||'none';
+#    $synsimdata{CONDVAR}=$synsimdata{SWEEPVAR}=$condvar;
+    my $xvar= $synsimdata{XVAR}|| $synsimdata{SETVAR}||$synsimdata{SWEEPVAR}||'';
+    $synsimdata{XVAR}=$synsimdata{SETVAR}=$synsimdata{SWEEPVAR}=$xvar;
     $setvar=$xvar;
   } else {
     my $xvar= $synsimdata{XVAR}|| $synsimdata{SWEEPVAR}||'';
@@ -231,7 +233,7 @@ my $workingdir=cwd();
 if( -d "../PLUGINS") {
   my @preprocs=glob("../PLUGINS/*.pm");
   foreach my $plugin (@preprocs) {
-    if($synsimdata{PREPROCESSOR} && ($plugin=~/$synsimdata{PREPROCESSOR}/) or $synsimdata{POSTPROCESSOR} && ($plugin=~/$synsimdata{POSTPROCESSOR}/)) {
+    if($synsimdata{PREPROCESSOR} && ($plugin=~/$synsimdata{PREPROCESSOR}/) or $synsimdata{POSTPROCESSOR} && ($plugin=~/$synsimdata{POSTPROCESSOR}/) or  ($plugin=~/$synsimdata{ANATEMPL}\.pm/)) {
       require $plugin;
     }
   }

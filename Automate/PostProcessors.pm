@@ -1,7 +1,7 @@
 package Simulation::Automate::PostProcessors;
 
 use vars qw( $VERSION );
-$VERSION = "1.0.0";
+$VERSION = "1.0.1";
 
 ################################################################################
 #                                                                              #
@@ -11,17 +11,17 @@ $VERSION = "1.0.0";
 #                                                                              #
 ################################################################################
 
-=headers
+#=headers
 
-Module to support SynSim simulation automation tool.
-This module contains all subroutines needed for postprocessing of the simulations results. 
-Some routines are quite generic, but most are specific to the type of simulation.
+#Module to support SynSim simulation automation tool.
+#This module contains all subroutines needed for postprocessing of the simulations results. 
+#Some routines are quite generic, but most are specific to the type of simulation.
 
-$Id: PostProcessors.pm,v 1.2 2003/09/04 09:54:19 wim Exp $
+#$Id$
 
-=cut
-#use warnings;
-#use strict;
+#=cut
+##use warnings;
+##use strict;
 
 use Carp;
 use lib '.','..';
@@ -294,9 +294,10 @@ sub CondXYPlot {
 
   #The values of the conditional variable
   my @condvarvals=@{$simdata{$condvar}};
-
+#print STDERR "CONDVARVALS: $condvar :",join(',', @condvarvals),"\n";
   # remove the original results file. data are in @results, so no need for it
   # and otherwise the files appear in the final plot
+#print STDERR "unlink $results_file_name;\n";
   unlink $results_file_name;
 
  if(not $verylast) { # The DOE is not finished yet 
@@ -309,26 +310,31 @@ sub CondXYPlot {
       my $value=$line[$datacol-1];
       if( !$condition_met && eval("$value$cond")) {
 	$condition_met=1;
+#print STDERR "COND is met for $value$cond\n";
 	my $setvarval=$current_set_vals{$setvar};
 	push @{$condval{$current_set_except_setvar_str}},"$setvarval $condvarval";
       }
     } # all results for current sweep
 
     if ($last) { # The X-axis sweep for the current set of parameters is finished.
-
+#print STDERR "LAST :";
 	foreach my $valstr (keys %condval) {
+#print STDERR "VALSTR: $valstr\n";
 	  my $new_results_file_name=$results_file_name;
 	  $new_results_file_name=~s/$current_set_str/$valstr/;
 	  open(RES,">$new_results_file_name");
 	  print RES $resheader;
 	  foreach my $line (@{$condval{$valstr}}) {
 	    print RES "$line\n";
+#	    print STDERR "$line\n";
 	  }
 	  close RES;
       }
     } # if last
   } else { ### On the very last run, collect the results into one nice plot
-    $ycol++;
+#    $ycol++;
+$ycol=2;
+$normvarval=1;
     &gnuplot_combined();
   }
 

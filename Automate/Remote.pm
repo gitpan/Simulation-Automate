@@ -1,7 +1,7 @@
 package Simulation::Automate::Remote;
 
 use vars qw( $VERSION );
-$VERSION = "1.0.0";
+$VERSION = "1.0.1";
 
 #################################################################################
 #                                                                              	#
@@ -21,7 +21,7 @@ $VERSION = "1.0.0";
 #-or,alternatively, an NFS mounted home directory
 #-as such, it'll probably only work on Linux and similar systems
 #
-#$Id: Remote.pm,v 1.2 2003/09/04 09:54:19 wim Exp $
+#$Id$
 #
 
 #usage:

@@ -1,4 +1,12 @@
 Revision history for Perl extension Simulation::Automate (was Simulation::Tools::SynSim).
+1.0.1  Fri Aug 13 15:03:32 BST 2004
+	Some minor bug fixes and small changes to the documentation.
+	- CondXYPlot bug 
+	- support multiple GROUP lines
+	- documented this behaviour in the POD
+	- synsim has now a -A flag to list all available Analyses
+	- POD: keywords in alphabetical order
+	- Minor fixes: see diff
 1.0.0  Mon Jan  5 11:23:42 UTC 2004
 	Finally the first "real" release of SynSim. LOTS of changes, but all to make it simpler, less buggy, with more features and still backward compatible. See the POD, the examples in the eg/ folder and the tutorial on my web site (www.comms.eee.strath.ac.uk/~wim/synsim_tutorial.html)
 	- list separator is now always comma; grouping is now supported via the GROUP keyword.
