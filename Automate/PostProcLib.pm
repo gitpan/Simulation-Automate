@@ -1,7 +1,7 @@
 package Simulation::Automate::PostProcLib;
 
 use vars qw( $VERSION );
-$VERSION = '0.9.3';
+$VERSION = "0.9.4";
 
 ################################################################################
 #                                                                              #
@@ -18,7 +18,7 @@ This module contains a set of utility functions for use in the
 PostProcessors.pm module.
 This module is generic.
 
-$Id: PostProcLib.pm,v 1.3 2003/01/08 12:19:38 wim Exp $
+$Id: PostProcLib.pm,v 1.2 2003/04/07 13:23:01 wim Exp $
 
 =cut
 
@@ -60,6 +60,7 @@ use Simulation::Automate::Dictionary;
 			  $xlabel
 			  $ylabel
 			  $logscale
+			  $style
 			  @results
 			  );
 
@@ -136,7 +137,7 @@ foreach my $key (keys %Simulation::Automate::PostProcLib::simdata) {
 ($simtitle=~/$key/) && do {
 my $val=$Simulation::Automate::PostProcLib::simdata{$key};
 my $nicekey=$make_nice{$key}{title};
-my $niceval=$make_nice{$key}{$val}||join(',',@{$val});
+my $niceval=$make_nice{$key}{${$val}[0]}||join(',',@{$val});
 $simtitle=~s/$key/$nicekey:\ $niceval/;
 };
 $Simulation::Automate::PostProcLib::title=$simtitle;
@@ -146,9 +147,10 @@ $Simulation::Automate::PostProcLib::title=$simtitle;
 $Simulation::Automate::PostProcLib::ylabel=$Simulation::Automate::PostProcLib::simdata{YLABEL}||"$Simulation::Automate::PostProcLib::title";
 $Simulation::Automate::PostProcLib::xlabel=$Simulation::Automate::PostProcLib::simdata{XLABEL}||"$Simulation::Automate::PostProcLib::title";
 $Simulation::Automate::PostProcLib::logscale=($Simulation::Automate::PostProcLib::simdata{LOGSCALE})?"set nologscale xy\nset logscale ".lc($Simulation::Automate::PostProcLib::simdata{LOGSCALE}):'set nologscale xy';
+#STYLE
+$Simulation::Automate::PostProcLib::style=$Simulation::Automate::PostProcLib::simdata{STYLE}||'';
 
-
-$Simulation::Automate::PostProcLib::sweepvartitle=$make_nice{$Simulation::Automate::PostProcLib::sweepvar}{title}||$Simulation::Automate::PostProcLib::xlabel||$Simulation::Automate::PostProcLib::sweepvar;
+$Simulation::Automate::PostProcLib::sweepvartitle=$Simulation::Automate::PostProcLib::xlabel||$make_nice{$Simulation::Automate::PostProcLib::sweepvar}{title}||$Simulation::Automate::PostProcLib::xlabel||$Simulation::Automate::PostProcLib::sweepvar;
 ( $Simulation::Automate::PostProcLib::legendtitle, $Simulation::Automate::PostProcLib::legend)=@{&create_legend($Simulation::Automate::PostProcLib::sweepvals,\%make_nice)};
 
 }
@@ -191,8 +193,8 @@ my $legend='';
 $legendtitle='';
 foreach my $key (sort keys %title) {
 $legendtitle.=',';
-$legendtitle.=$make_nice{$key}{title}||$key;
-$legend.=$make_nice{$key}{$title{$key}}||$title{$key};
+$legendtitle.=$make_nice{$key}{title}||&make_nice($key);
+$legend.=$make_nice{$key}{$title{$key}}||&make_nice($title{$key});
 $legend.=',';
 }
 $legend=~s/,$//;
@@ -248,7 +250,7 @@ my %title=split('-',$title);
 my $legend='';
 my $legendtitle='';
 foreach my $key (sort keys %title) {
-my $titlepart=$make_nice{$key}{title}||$key;
+my $titlepart=$make_nice{$key}{title}||&make_nice($key);
 $legendtitle.=','.$titlepart;
 my $legendpart=$make_nice{$key}{$title{$key}}||$title{$key};
 $legend.=','.$legendpart;
@@ -256,6 +258,15 @@ $legend.=','.$legendpart;
 $legend=~s/^,//;
 $legendtitle=~s/^,//;
 return [$legendtitle,$legend];
+}
+#------------------------------------------------------------------------------
+sub make_nice {
+my $varname=shift;
+$varname=~s/^_//;
+$varname=~s/_/ /g;
+$varname=lc($varname);
+$varname=~s/^([a-z])/uc($1)/e;
+return $varname;
 }
 #------------------------------------------------------------------------------
 1;

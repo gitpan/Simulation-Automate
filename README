@@ -1,4 +1,4 @@
-Simulation/Automate version 0.9.3
+Simulation/Automate version 0.9.4
 =====================================
 
 Simulation::Automate ('SynSim') is a generic template-driven simulation automation tool. It works with any simulator that accepts text input files and generates text output. It executes thousands of simulations with different input files automatically, and processes the results. Postprocessing facilities include basic statistical analysis and automatic generation of PostScript plots with Gnuplot. SynSim is entirely modular, making it easy to add your own analysis and postprocessing routines.

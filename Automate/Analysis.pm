@@ -1,7 +1,7 @@
 package Simulation::Automate::Analysis;
 
 use vars qw( $VERSION );
-$VERSION = '0.9.3';
+$VERSION = "0.9.4";
 
 #################################################################################
 #                                                                              	#
@@ -18,7 +18,7 @@ Based on create_histograms.pl
 This is not finished by far, but already useful.
 This module is used by SynSim.pm and PostProcessors.pm
 
-$Id: Analysis.pm,v 1.2 2003/01/08 11:40:35 wim Exp $
+$Id: Analysis.pm,v 1.2 2003/04/07 13:23:01 wim Exp $
 
 =cut
 
@@ -118,6 +118,7 @@ if($log=~/log/i) {
 foreach my $logkey (sort keys %trend) {
 ($logkey !~/log/i) && next;
 foreach my $i (0..@{$trend{$logkey}}-1) {
+#carp "$i:${$trend{$logkey}}[$i]\n";
 if(${$trend{$logkey}}[$i]>0){
 ${$trend{$logkey}}[$i]=log(${$trend{$logkey}}[$i])/log(10); 
 } else {
@@ -304,8 +305,8 @@ if(not @_){die 'arguments: $datafilename,\@parameters,$title,$log'."\n"}
  $binfile=shift;
  @pars= @{shift(@_)}; # deref an array ref
  $title=shift||'';
-my $log=shift||'';
-
+ $log=shift||'';
+#carp "LOG:$log\n";
 $uctitle=uc($title);
 $lctitle=lc($title);
 $lctitle=~s/\s+/_/g;

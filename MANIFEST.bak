@@ -1,3 +1,4 @@
+Automate.html
 Automate.pm
 Automate/Analysis.pm
 Automate/Dictionary.pm
@@ -9,13 +10,10 @@ MANIFEST
 Makefile.PL
 README
 eg/ErrorFlags.data
-eg/Expressions.data
 eg/Histogram.data
 eg/SOURCES/MersenneTwister.h
 eg/SOURCES/bufsim3.cc
-eg/SweepVar.data
 eg/TEMPLATES/SIMTYPES/bufsim3.templ
-eg/gnuplot.data
 eg/synsim
 eg/synsim-mode.el
 eg/synsim.data

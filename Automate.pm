@@ -1,7 +1,7 @@
 package Simulation::Automate;
 
 use vars qw( $VERSION );
-$VERSION = '0.9.3';
+$VERSION = "0.9.4";
 
 #################################################################################
 #                                                                              	#
@@ -18,7 +18,7 @@ $VERSION = '0.9.3';
 #this module is then called via eval() and used by Simulation::Automate.pm 
 #Loops calls &Automate::main() at every pass through the loops.
 #
-#$Id: Automate.pm,v 1.2 2003/01/08 11:39:59 wim Exp $
+#$Id: Automate.pm,v 1.3 2003/04/07 15:00:31 wim Exp $
 #
 
 
@@ -62,7 +62,7 @@ my $simref=&generate_loop_module($dataref,$dataset,\@flags);
 &execute_loop($datafile,$dataset,$simref,\@flags) && do {
 unlink "Loops_$dataset.pm";
 };
-
+print STDERR "\nFinished SynSim run for $dataset\n\n";
 return 1;
 }
 #===============================================================================
@@ -79,18 +79,18 @@ my ($batch,$interactive,$nosims,$plot,$verbose,$warn)=(0,0,0,0,0,0);
 my $default=1;
 if(@ARGV) {
 my $dtf=0;
-    foreach(@ARGV){
+    foreach(@ARGV) {
       if(/-f/){$dtf=1;next}
-      if($dtf==1){
-      $_[0]=$_;$datafile=$_;$default=0;$dtf=0;
-}
+      if($dtf==1) {
+	$_[0]=$_;$datafile=$_;$default=0;$dtf=0;
+      }
       if(/-b/){$batch=1;next} 
       if(/-i/){$interactive=1;next}
       if(/-N/){$nosims=1;next}
       if(/-p/){$plot=1;next}
       if(/-v/){$verbose=1;next}
       if(/-w/){$warn=1;next;}
-      if(/-h|-\?/){ 
+      if(/-h|-\?/) { 
 my $script=$0;
 $script=~s/.*\///;
 die <<"HELP";
@@ -116,6 +116,14 @@ HELP
 }
     } # foreach @ARGV
 
+#test if the last argument might be the filename (if no -f flag)
+if($default){
+my $test=$ARGV[@ARGV-1];
+if($test!~/^\-/) {
+$datafile=$test;
+$default=0;
+}
+}
     if($default) {
 print STDERR "Assuming $datafile as input data filename\n" if $verbose;
 }
@@ -407,13 +415,21 @@ foreach my $sim (keys %multisimdata) {
   foreach (@{$multisimdata{$sim}}){
 
   if(/^\s*_/) {
-my @line=split(/\s*=\s*/,$_);
 
+my @line=();#split(/\s*=\s*/,$_);
+# changed to allow expressions with "=" 
+my $line=$_;
+($line=~s/^([A-Z0-9_]+)?\s*=\s*//)&&($line[0]=$1);
+$line[1]=$line;
 $line[1]=~s/\s*\,\s*/,/g;
 $line[1]=~s/\s*\;\s*/;/g;
 $data{$sim}{$line[0]}=$line[1];
 } elsif (/:/) {
-my @line=split(/\s*:\s*/,$_);
+my @line=();#split(/\s*:\s*/,$_);
+# changed to allow expressions with ":"
+my $line=$_;
+($line=~s/^([A-Z0-9_]+)?\s*\:\s*//)&&($line[0]=$1);
+$line[1]=$line;
 ##strip leading _
 #$line[0]=~s/^\s*_//;
 #strip trailing spaces
@@ -450,13 +466,13 @@ while(<DATA>) {
 /^\s*$/ && next;
 chomp;
 # allow include files for configuration variables
-/INCL\s*:/ && do {
+/INCL.*\s*:/ && do {
 my $incl=$_;
 $incl=~s/^.*\:\s*//;
 $incl=~s/\s+$//;
 my @incl=($incl=~/,/)?split(/\s*,\s*/,$incl):($incl);
 foreach my $inclf (@incl) {
-open(INCL,"<$inclf");
+open(INCL,"<$inclf")|| die $!;
 while(<INCL>){
 /^\s*\#/ && next;
 /^\s*$/ && next;
@@ -510,9 +526,10 @@ sub execute_loop {
 my $datafilename=shift;
 my $dataset=shift;
 
-eval("
-use Loops_$dataset;
-");
+require "./Loops_$dataset.pm";
+#eval("
+#use Loops_$dataset;
+#");
 
 my $simref=shift;
 my @flags=@{shift(@_)};
@@ -527,7 +544,12 @@ my $dev=${$simref}{$sim}->{DEVTYPE}||'';
 my $dirname= "${sim}-$dataset";
 
   if(-e $dirname && -d $dirname && ($nosims==0)) {
-print STDERR "\n# Removing old $dirname dir\n".`rm -Rf $dirname` if $verbose;
+print STDERR "\n# Removing old $dirname dir\n" if $verbose;
+if ($verbose) {
+print `rm -Rf $dirname`;
+} else {
+system("rm -Rf $dirname");
+}
 }
 
   if (not -e "TEMPLATES/SIMTYPES/$sim$templ" ) {
@@ -705,17 +727,17 @@ SynSim is a generic template-driven simulation automation tool. It works with an
 =over
 
 =item 1.
-Download the gzipped tar file F<Simulation-Automate-0.9.3.tar.gz>
+Download the gzipped tar file F<Simulation-Automate-0.9.4.tar.gz>
 
 =item 2.
 Extract the archive:
 
-	tar -xvf Simulation-Automate-0.9.3.tar.gz
+	tar -xvf Simulation-Automate-0.9.4.tar.gz
 
 =item 3.
 Create the Makefile:
 
-	cd Simulation-Automate-0.9.3
+	cd Simulation-Automate-0.9.4
 	perl Makefile.PL
 
 =item 4.
@@ -770,6 +792,9 @@ The archive structure is as follows:
 		synsim.data
 		ErrorFlags.data
 		Histogram.data
+		SweepVar.data
+		Expressions.data
+		gnuplot.data
 		SOURCES/
 			bufsim3.cc
 			MersenneTwister.h
@@ -982,9 +1007,9 @@ The column in the output file which contains simulation results (default: 2). Ma
 
 String describing the simulation, for use in the postprocessing.
 
-=item XLABEL,YLABEL, LOGSCALE
+=item XLABEL, YLABEL, LOGSCALE, STYLE
 
-Variables to allow more flexibility in the customization of the plots. XLABEL and YLABEL are the X and Y axis labels. LOGSCALE is either X, Y or XY, and results in a logarithmic scale for the chosen axis.
+Variables to allow more flexibility in the customization of the plots. XLABEL and YLABEL are the X and Y axis labels. LOGSCALE is either X, Y or XY, and results in a logarithmic scale for the chosen axis. STYLE is the gnuplot plot style (lines, points etc)
 
 =item XTICS, YTICS, XSTART, XSTOP, YSTART, YSTOP
 
@@ -992,6 +1017,23 @@ Variables to allow more flexibility in the customization of the plots (not imple
 
 =back
 
+=head2 Expressions
+
+The SynSim datafile has support for expressions, i.e. it is possible to express the value list of a variable in terms of the values of other variables.
+
+Example:
+
+    # average packet length for IP dist 
+    _MEANPL = ((_AGGREGATE==0)?2784:9120)
+    # average gap width 
+    _MEANGW= int(_MEANPL*(1/_LOAD-1)) 
+    # average load
+    _LOAD = 0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;0.9
+    # aggregate 
+    _AGGREGATE =  0,12000
+
+The variables used in the expressions must be defined in the datafile, although not upfront. Using circular references will not work.
+The expression syntax is Perl syntax, so any Perl function can be used. Due to the binding rules, it is necessary to enclose expressions using the ternary operator ?: with brackets (see example).
 
 The next sections (L<DICTIONARY> and L<POSTPROCESSING>) are optional. For instructions on how to run SynSim, go to L<RUNNING SYNSIM>.
 
@@ -1036,15 +1078,26 @@ Routines to perform analysis on the simulation results in the PostProcessors mod
 
 =item SweepVar
 
-Creates a plot using C<SWEEPVAR> as X-axis and all other variables as paramters. This routine is completely generic.
+Creates a plot using C<SWEEPVAR> as X-axis and all other variables as paramters. This routine is completely generic. The C<SWEEPVAR> value list must be semicolon-separated.
 
 =item ErrorFlags 
 
-Calculates average and 95% confidence intervals and plots error flags. (Will be generic soon, more info then :-)
+Creates a plot using C<SWEEPVAR> as X-axis and all other variables as paramters. Calculates average and 95% confidence intervals for C<_POP_SAMPLE> samples and plots error flags. This routine is almost fully generic, apart from the 95% interval which is fixed for now. See eg/ErrorFlags.data for an example datafile. The C<SWEEPVAR> value list must be comma-separated (!). The number of samples of the population C<_POP_SAMPLE> is a simulation variable rather than a configuration variable. As a consequence, it must be specified as a list, e.g. 
+
+ _POP_SAMPLE = 1..20
+
+and not
+
+ _POP_SAMPLE = 20
 
 =item Histogram
 
-Creates a histogram of the simulation results.  (Will be generic soon, more info then  :-)
+Creates a histogram of the simulation results. This requires the simulator to produce raw data for the histograms in a tabular format. The configuration variable C<OUTPUT_FILTER_PATTERN> can be used to 'grep' the simulator output. When specifying logscale X or XY for the plot, the histogram bins will be logarithmic. See eg/Histogram.data for an example. 
+The number of bins in the histogram must be specified via C<SWEEPVAR>, e.g.
+
+ SWEEPVAR : _NBINS
+
+ _NBINS = 20
 
 =back
 
@@ -1466,9 +1519,25 @@ To access the binary files, you'll have to write your own postprocessing routine
 
 =back
 
+=head1 TO DO
+
+This module is still Alpha, a lot of work remains to be done to make it more user-friendly. The main tasks:
+
+=over
+
+=item *
+
+Add a GUI. A prototype can be found on my web site, it is already useful bu too early to include here.
+
+=item *
+
+The syntax for variables for use in the postprocessing modules should be redefined. At the moment, some of them are treated as configuration variables, some as simulation variables. I think a separate class of user-defined variables would be better.
+
+=back
+
 =head1 AUTHOR
 
-Wim Vanderbauwhede <wim@motherearth.org>
+Wim Vanderbauwhede <wim\x40motherearth.org>
 
 =head1 COPYRIGHT
 

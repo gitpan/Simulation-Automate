@@ -1,7 +1,7 @@
 package Simulation::Automate::Main;
 
 use vars qw( $VERSION );
-$VERSION = '0.9.3';
+$VERSION = "0.9.4";
 
 ################################################################################
 #                                                                              #
@@ -21,7 +21,7 @@ SynSimGen.pm.
 
 This module is generic.
 
-$Id: Main.pm,v 1.2 2003/01/08 11:40:35 wim Exp $
+$Id: Main.pm,v 1.2 2003/04/07 13:23:01 wim Exp $
 
 =cut
 
@@ -42,6 +42,12 @@ use lib '.','..';
 use  Simulation::Automate::Analysis;
 
 ##################################################################################
+my $simpid=undef; 
+#END{
+#print `ps -f | grep bufsim3| grep -v grep`;
+#print STDERR "Sending SIGTERM to simulator ($simpid) from $0 ...\n";
+#kill 'TERM',$simpid;
+#}
 
 sub main {
 
@@ -104,13 +110,46 @@ my $nsim=($simn eq '')?0:$simn;
   close (NEW);
   
   if($nosims==0) {
-
     if($verbose) {
-      system("$commandline");
+
+if (!defined($simpid = fork())) {
+    # fork returned undef, so failed
+    die "cannot fork: $!";
+} elsif ($simpid == 0) {
+                # fork returned 0, so this branch is the child
+    exec("$commandline");
+                # if the exec fails, fall through to the next statement
+    die "can't exec $commandline : $!";
+} else { 
+                # fork returned neither 0 nor undef, 
+                # so this branch is the parent
+
+waitpid($simpid, 0);
+} 
+
+#      system("$commandline");
     } else { 
-      print STDERR "\n";
-      print STDERR grep /$pattern/,`$commandline > simlog 2>&1`;
-      print STDERR "\n";
+      print STDERR "\n" if $verbose;
+
+#      print STDERR grep /$pattern/,`$commandline > simlog 2>&1`;
+
+#or, with a pipe:
+
+$simpid = open(SIM, "$commandline 2>&1 |") || die "can't fork: $!"; 
+open(LOG,">simlog");
+while (<SIM>) {
+print LOG;
+/$pattern/ && do {
+print STDERR;# if $verbose;
+};
+} 
+close LOG;
+my $ppid=getpgrp($simpid);
+if(not $ppid) {
+close SIM || die "Trouble with $commandline: $! $?";
+}
+
+      print STDERR "\n" if $verbose;
     }
   } # if simulations not disabled
     if($nsims>1) {
@@ -135,7 +174,7 @@ chdir "$workingdir";
 return \@results;
 } #END of main()
 
-print STDERR "#" x 80,"\n#\t\t\tSynSim simulation automation tool\n#\n#  (c) Wim Vanderbauwhede 2000,2002. All rights reserved.\n#  This program is free software; you can redistribute it and/or modify it\n#  under the same terms as Perl itself.\n#\n","#" x 80;#,"\n\n Module SynSim::Main loaded\n\n";
+print STDERR "\n","#" x 80,"\n#\t\t\tSynSim simulation automation tool\n#\n#  (c) Wim Vanderbauwhede 2000,2002. All rights reserved.\n#  This program is free software; you can redistribute it and/or modify it\n#  under the same terms as Perl itself.\n#\n","#" x 80,"\n";
 
 #-------------------------------------------
 # SUBROUTINES
@@ -157,6 +196,13 @@ my %simdata=%{$simdataref};
 my $fh=shift; 
 my $dataset=shift;
 my $warn=shift;
+my %exprdata=();
+foreach my $key (keys %simdata) {
+  ($key!~/^_/) && next;
+  if(@{$simdata{$key}}==1) {
+    $exprdata{$key}=&check_for_expressions(\%simdata,$key,$nsim);
+  } # if..else
+} # foreach 
 
 	# OPEN TEMPLATE
 	open (TEMPL, "<$templfilename")||die "Can't open $templfilename\n";
@@ -167,23 +213,26 @@ my $warn=shift;
 			my $ndata=@{$simdata{$key}};
 			if($ndata>1) {
 			  if($line =~ s/$key(?!\w)/$simdata{$key}->[$nsim]/g){
-			  print STDERR "# $key = ",$simdata{$key}->[$nsim],"\n";
+#			  print STDERR "# $key = ",$simdata{$key}->[$nsim],"\n" if $warn;
 			}
 			} else {
-			  $line =~ s/$key(?!\w)/$simdata{$key}->[0]/g;
+#			  my $simdata=&check_for_expressions(\%simdata,$key,$nsim);
+			  $line =~ s/$key(?!\w)/$exprdata{$key}/g;
+#			  print STDERR "# $key = ",$simdata{$key}->[0],"\n" if $warn;
 			} # if..else
 
 		      } # foreach 
 
-		  # check for not_defined variables
-		if($line=~/\b(_\w+?)\b/&&$line!~/$1\$/) {
-		  my $nondefvar=$1;
-		  $line=~s/$nondefvar/0/;
-		  print STDERR "\nWarning: $nondefvar ($templfilename) not defined in $dataset.\n" if $warn; #Substituted by 0.\n";
-		} # if some parameter is still there
-		print $fh $line;
-	} # while
+		  # check for undefined variables
+		  while($line=~/\b(_\w+?)\b/&&$line!~/$1\$/) {
+		    my $nondefvar=$1;
+		    $line=~s/$nondefvar/0/g; # All undefined vars substituted by 0
+		    print STDERR "\nWarning: $nondefvar ($templfilename) not defined in $dataset.\n" if $warn; 
+		  } # if some parameter is still there
+		  print $fh $line;
+		} # while
 close TEMPL;
+
 } # END OF gen_sim_script 
 
 sub egrep {
@@ -197,4 +246,30 @@ print OUT grep /$pattern/,<IN>;
 
 close IN;
 close OUT;
+}
+
+sub check_for_expressions {
+my $dataref=shift;
+my $key=shift;
+my $nsim=shift;
+my %simdata=%{$dataref};	
+my $expr=$simdata{$key}->[0];
+if($expr=~/(_[A-Z_]+)/) { # was "if"
+while($expr=~/(_[A-Z_]+)/) { # was "if"
+#variable contains other variables
+#_A =3*log(_B)+_C*10-_D**2
+#_A =3 ;log;_B;;_C;10;_D;;2
+my @maybevars=split(/[\ \*\+\-\/\^\(\)\[\]\{\}\?\:\=]+/,$expr);
+my @vars=();
+foreach my $maybevar ( @maybevars){
+($maybevar=~/_[A-Z]+/)&& push @vars,$maybevar;
+}
+foreach my $var (@vars) {
+my $simn=(@{$simdata{$var}}==1)?0:$nsim;
+$expr=~s/$var/$simdata{$var}->[$simn]/g;
+}
+}
+#print STDERR "$key=$expr=>",eval($expr),"\n";
+}
+return eval($expr);
 }

@@ -1,7 +1,7 @@
 package Simulation::Automate::PostProcessors;
 
 use vars qw( $VERSION );
-$VERSION = '0.9.3';
+$VERSION = "0.9.4";
 
 ################################################################################
 #                                                                              #
@@ -17,7 +17,7 @@ Module to support SynSim simulation automation tool.
 This module contains all subroutines needed for postprocessing of the simulations results. 
 Some routines are quite generic, but most are specific to the type of simulation.
 
-$Id: PostProcessors.pm,v 1.2 2003/01/08 11:40:36 wim Exp $
+$Id: PostProcessors.pm,v 1.2 2003/04/07 13:23:02 wim Exp $
 
 =cut
 
@@ -29,14 +29,20 @@ use lib '.','..';
 use Simulation::Automate::Analysis;
 use Simulation::Automate::PostProcLib;
 ##################################################################################
+# Three generic routines are provided:
+# SweepVar: to make a sweep over one variable while using any number of parameters
+# ErrorFlags: 
+# Histogram: to create simple histograms
+
 # This is a very generic module to generate plots from any sweep that is not the buffer depth
 
 sub SweepVar {
 my @args=@_;
 &prepare_plot(@args);
 
-#my $norm=${$simdata{$normvar}}[0]||1; 
-my $norm=${$simdata{$normvar}}[$count]||1; 
+(!@{$simdata{$normvar}})&&(${$simdata{$normvar}}[0]=1);
+my $norm=(@{$simdata{$normvar}}>1)?${$simdata{$normvar}}[$count]:${$simdata{$normvar}}[0];
+#my $norm=${$simdata{$normvar}}[$count]||1; 
 my $col=$datacol+1;
 
 my @sweepvarvals=@{$simdata{$sweepvar}};
@@ -106,7 +112,7 @@ $plotlinetempl=~s/_DATACOL/$col/;
 
 my $xtics=2;#change later
 my $firstplotline=<<"ENDH";
-set terminal postscript landscape enhanced  color solid "Helvetica" 12
+set terminal postscript landscape enhanced  color solid "Helvetica" 14
 set output "${simtempl}-${anatempl}.ps"
 
 $logscale
@@ -118,9 +124,9 @@ set grid xtics ytics mxtics mytics
 set key right top box 
 set key title "$legendtitle" 
 
-set title "$title" "Helvetica,14"
-set xlabel "$sweepvartitle"
-set ylabel "$ylabel"
+set title "$title" "Helvetica,18"
+set xlabel "$sweepvartitle" "Helvetica,16"
+set ylabel "$ylabel" "Helvetica,16"
 
 ENDH
 
@@ -134,14 +140,18 @@ sub ErrorFlags {
 my @args=@_;
 &prepare_plot(@args);
 
-my $norm=${$simdata{$normvar}}[0]||1;
+(!@{$simdata{$normvar}})&&(${$simdata{$normvar}}[0]=1);
+my $norm=(@{$simdata{$normvar}}>1)?${$simdata{$normvar}}[$count]:${$simdata{$normvar}}[0];
+#my $norm=${$simdata{$normvar}}[0]||1;
 
 my $sweepvarval=$simdata{$sweepvar}[0];
 
 #this is to combine the values for different buffers into 1 file
-$sweepvals=~s/\-$sweepvar\-\d+//;
 
-if($verylast==0){
+$sweepvals=~s/\-*$sweepvar\-[\d\.]+//;
+$sweepvals=~s/^\-*//;
+
+if($verylast==0) {
 # calc average after every $count
 
 my $par='LOSS';
@@ -204,6 +214,8 @@ ENDS
 } else {
 ### On the very last run, collect the results into one nice plot
 
+
+
 #this is very critical. The quotes really matter!
 # as a rule, quotes inside gnuplot commands must be escaped
 
@@ -240,13 +252,24 @@ sub Histogram {
 
 my @args=@_;
 &prepare_plot(@args);
-
+my $plotstyle=($style ne '')?$style:'boxes';
 my $sweepvarval=${$simdata{$sweepvar}}[0]; # used for nbins?!
 
+my $par='DATA';#must be "LOG" for log plot
+my $log=''; #must be 'log' for log plot
+#carp "LOGSCALE: $logscale\n";
+my @logscale=split("\n",$logscale);
+    if($logscale[1]=~/x/i){
+$logscale[1]=~s/x//i;
+$logscale="$logscale[0]\n$logscale[1]\n";
+$par='LOG';#'DATA';#must be "LOG" for log plot
+$log='log'
+    }
+#carp "LOGSCALE: $logscale\n";
+
   if($verylast==0) {
-my $par='DATA';
-#print STDERR '%{&build_histograms("'."${simtempl}_C$count.res".'"'.",[$par,$datacol],$title,'',$sweepvarval)}\n";die;
-my %hists=%{&build_histograms("${simtempl}_C$count.res",[$par,$datacol],$title,'',$sweepvarval)};
+
+my %hists=%{&build_histograms("${simtempl}_C$count.res",[$par,$datacol],$title,$log,$sweepvarval)};
 
 #system("grep '#' ${simtempl}_C$count.res > ${simtempl}-${anatempl}-$sweepvals.res");
 &egrep('#',"${simtempl}_C$count.res",'>',"${simtempl}-${anatempl}-$sweepvals.res");
@@ -257,10 +280,10 @@ print HIST $pair->{BIN},"\t",$pair->{COUNT},"\n";
 }
 close HIST;
 if($interactive) {
-&gnuplot( "plot '${simtempl}-${anatempl}-$sweepvals.res' with boxes\n\!sleep 1\n");
+&gnuplot( "plot '${simtempl}-${anatempl}-$sweepvals.res' with $plotstyle\n\!sleep 1\n");
 }
 } else {
-my $plotlinetempl=q("\'$filename\' title \"$legend\" with boxes");
+my $plotlinetempl=q("\'$filename\' title \"$legend\" with ).$plotstyle.q(");
 
 my $firstplotline=<<"ENDH";
 set terminal postscript landscape enhanced  color solid "Helvetica" 12

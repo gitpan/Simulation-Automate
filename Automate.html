@@ -52,6 +52,9 @@
 <LI><A HREF="#Configuration%20variables">Configuration variables
 
 </A></LI>
+<LI><A HREF="#Expressions">Expressions
+
+</A></LI>
 </UL>
 <LI><A HREF="#DICTIONARY">DICTIONARY
 
@@ -93,6 +96,9 @@
 
 </A></LI>
 </UL>
+<LI><A HREF="#TO%20DO">TO DO
+
+</A></LI>
 <LI><A HREF="#AUTHOR">AUTHOR
 
 </A></LI>
@@ -146,8 +152,8 @@
 </P><H1><A NAME="INSTALLATION">INSTALLATION
 
 </A></H1>
-<DL><DT><A NAME="1.%0aDownload%20the%20gzipped%20tar%20file%20Simulation-Automate-0.9.3.tar.gz">1.
-Download the gzipped tar file <I>Simulation-Automate-0.9.3.tar.gz</I>
+<DL><DT><A NAME="1.%0aDownload%20the%20gzipped%20tar%20file%20Simulation-Automate-0.9.4.tar.gz">1.
+Download the gzipped tar file <I>Simulation-Automate-0.9.4.tar.gz</I>
 
 </A></DT>
 <DD>
@@ -158,7 +164,7 @@ Extract the archive:
 </A></DT>
 <DD>
 
-<PRE>	tar -xvf Simulation-Automate-0.9.3.tar.gz</PRE>
+<PRE>	tar -xvf Simulation-Automate-0.9.4.tar.gz</PRE>
 </DD>
 <DT><A NAME="3.%0aCreate%20the%20Makefile%3a">3.
 Create the Makefile:
@@ -166,7 +172,7 @@ Create the Makefile:
 </A></DT>
 <DD>
 
-<PRE>	cd Simulation-Automate-0.9.3
+<PRE>	cd Simulation-Automate-0.9.4
 	perl Makefile.PL</PRE>
 </DD>
 <DT><A NAME="4.%0aMake%20Simulation%3a%3aAutomate%3a">4.
@@ -238,6 +244,9 @@ or</PRE>
 		synsim.data
 		ErrorFlags.data
 		Histogram.data
+		SweepVar.data
+		Expressions.data
+		gnuplot.data
 		SOURCES/
 			bufsim3.cc
 			MersenneTwister.h
@@ -541,11 +550,11 @@ The column in the output file which contains simulation results (default: 2). Ma
 String describing the simulation, for use in the postprocessing.
 
 </DD>
-<DT><A NAME="XLABEL%2cYLABEL%2c%20LOGSCALE">XLABEL,YLABEL, LOGSCALE
+<DT><A NAME="XLABEL%2c%20YLABEL%2c%20LOGSCALE%2c%20STYLE">XLABEL, YLABEL, LOGSCALE, STYLE
 
 </A></DT>
 <DD>
-Variables to allow more flexibility in the customization of the plots. XLABEL and YLABEL are the X and Y axis labels. LOGSCALE is either X, Y or XY, and results in a logarithmic scale for the chosen axis.
+Variables to allow more flexibility in the customization of the plots. XLABEL and YLABEL are the X and Y axis labels. LOGSCALE is either X, Y or XY, and results in a logarithmic scale for the chosen axis. STYLE is the gnuplot plot style (lines, points etc)
 
 </DD>
 <DT><A NAME="XTICS%2c%20YTICS%2c%20XSTART%2c%20XSTOP%2c%20YSTART%2c%20YSTOP">XTICS, YTICS, XSTART, XSTOP, YSTART, YSTOP
@@ -556,7 +565,29 @@ Variables to allow more flexibility in the customization of the plots (not imple
 
 </DD>
 </DL>
+<H2><A NAME="Expressions">Expressions
 
+</A></H2>
+
+<P>The SynSim datafile has support for expressions, i.e. it is possible to express the value list of a variable in terms of the values of other variables.
+
+</P>
+<P>Example:
+
+</P>
+<PRE>    # average packet length for IP dist 
+    _MEANPL = ((_AGGREGATE==0)?2784:9120)
+    # average gap width 
+    _MEANGW= int(_MEANPL*(1/_LOAD-1)) 
+    # average load
+    _LOAD = 0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;0.9
+    # aggregate 
+    _AGGREGATE =  0,12000</PRE>
+
+<P>The variables used in the expressions must be defined in the datafile, although not upfront. Using circular references will not work.
+The expression syntax is Perl syntax, so any Perl function can be used. Due to the binding rules, it is necessary to enclose expressions using the ternary operator ?: with brackets (see example).
+
+</P>
 <P>The next sections (<A HREF="DICTIONARY.html">DICTIONARY</A> and <A HREF="POSTPROCESSING.html">POSTPROCESSING</A>) are optional. For instructions on how to run SynSim, go to <A HREF="#RUNNING%20SYNSIM">RUNNING SYNSIM</A>.
 
 
@@ -607,22 +638,36 @@ Variables to allow more flexibility in the customization of the plots (not imple
 
 </A></DT>
 <DD>
-Creates a plot using <CODE>SWEEPVAR</CODE> as X-axis and all other variables as paramters. This routine is completely generic.
+Creates a plot using <CODE>SWEEPVAR</CODE> as X-axis and all other variables as paramters. This routine is completely generic. The <CODE>SWEEPVAR</CODE> value list must be semicolon-separated.
 
 </DD>
 <DT><A NAME="ErrorFlags">ErrorFlags 
 
 </A></DT>
 <DD>
-Calculates average and 95% confidence intervals and plots error flags. (Will be generic soon, more info then :-)
 
+<P>Creates a plot using <CODE>SWEEPVAR</CODE> as X-axis and all other variables as paramters. Calculates average and 95% confidence intervals for <CODE>_POP_SAMPLE</CODE> samples and plots error flags. This routine is almost fully generic, apart from the 95% interval which is fixed for now. See eg/ErrorFlags.data for an example datafile. The <CODE>SWEEPVAR</CODE> value list must be comma-separated (!). The number of samples of the population <CODE>_POP_SAMPLE</CODE> is a simulation variable rather than a configuration variable. As a consequence, it must be specified as a list, e.g. 
+
+</P>
+<PRE> _POP_SAMPLE = 1..20</PRE>
+
+<P>and not
+
+</P>
+<PRE> _POP_SAMPLE = 20</PRE>
 </DD>
 <DT><A NAME="Histogram">Histogram
 
 </A></DT>
 <DD>
-Creates a histogram of the simulation results.  (Will be generic soon, more info then  :-)
 
+<P>Creates a histogram of the simulation results. This requires the simulator to produce raw data for the histograms in a tabular format. The configuration variable <CODE>OUTPUT_FILTER_PATTERN</CODE> can be used to 'grep' the simulator output. When specifying logscale X or XY for the plot, the histogram bins will be logarithmic. See eg/Histogram.data for an example. 
+The number of bins in the histogram must be specified via <CODE>SWEEPVAR</CODE>, e.g.
+
+</P>
+<PRE> SWEEPVAR : _NBINS</PRE>
+
+<PRE> _NBINS = 20</PRE>
 </DD>
 </DL>
 <H2><A NAME="PostProcLib">PostProcLib
@@ -1144,11 +1189,25 @@ To access the binary files, you'll have to write your own postprocessing routine
 
 </DD>
 </DL>
+<H1><A NAME="TO%20DO">TO DO
+
+</A></H1>
+
+<P>This module is still Alpha, a lot of work remains to be done to make it more user-friendly. The main tasks:
+
+</P><UL>
+<LI>Add a GUI. A prototype can be found on my web site, it is already useful bu too early to include here.
+
+</LI>
+<LI>The syntax for variables for use in the postprocessing modules should be redefined. At the moment, some of them are treated as configuration variables, some as simulation variables. I think a separate class of user-defined variables would be better.
+
+</LI>
+</UL>
 <H1><A NAME="AUTHOR">AUTHOR
 
 </A></H1>
 
-<P>Wim Vanderbauwhede &lt;wim@motherearth.org&gt;
+<P>Wim Vanderbauwhede &lt;wim\x40motherearth.org&gt;
 
 </P><H1><A NAME="COPYRIGHT">COPYRIGHT
 
