@@ -5,6 +5,8 @@ Automate/Dictionary.pm
 Automate/Main.pm
 Automate/PostProcLib.pm
 Automate/PostProcessors.pm
+Automate/PostProcessorsOld.pm
+Automate/PreProcessors.pm
 Automate/Remote.pm
 Changes
 MANIFEST			This list of files
@@ -15,14 +17,26 @@ bin/synsim
 eg/ErrorFlags.data
 eg/Expressions.data
 eg/Histogram.data
+eg/PLUGINS/show_source.pm
 eg/SOURCES/MersenneTwister.h
 eg/SOURCES/bufsim3.cc
+eg/SOURCES/quadratic.py
+eg/SOURCES/quadratic_sweep.py
 eg/SweepVar.data
 eg/TEMPLATES/SIMTYPES/bufsim3.templ
+eg/TEMPLATES/quadratic.gnuplot
+eg/TEMPLATES/quadratic.templ
+eg/TEMPLATES/quadratic_sweep.templ
+eg/TEMPLATES/test.templ
 eg/example.data
 eg/gnuplot.data
+eg/histogram.data
+eg/qsweep.data
+eg/quadratic.data
+eg/quadratic_cond.data
 eg/synsim
 eg/synsim-mode.el
 eg/synsim.data
 eg/test.data
+local_install.pl
 test.pl

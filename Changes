@@ -1,7 +1,15 @@
 Revision history for Perl extension Simulation::Automate (was Simulation::Tools::SynSim).
+1.0.0  Mon Jan  5 11:23:42 UTC 2004
+	Finally the first "real" release of SynSim. LOTS of changes, but all to make it simpler, less buggy, with more features and still backward compatible. See the POD, the examples in the eg/ folder and the tutorial on my web site (www.comms.eee.strath.ac.uk/~wim/synsim_tutorial.html)
+	- list separator is now always comma; grouping is now supported via the GROUP keyword.
+	- Postprocessing and preprocessing modules are now MUCH easier to write, and can be put in a PLUGINS folder in your project directory
+	- Templates can now reside directly under TEMPLATES; use SIMTYPES and DEVTYPES folders only when you really need them
+	- I added a lot of aliases for the keywords, now you can say TEMPLATE instead of SIMTYPE etc.;
+	- Please read the POD, it's all there
+	- And to know the nitty-gritty, look at the diff
 
 0.9.7  Thu Sep  4 10:56:45 BST 2003
-	- Fixed a bug in the expression handling: now > and < are supported as well
+	- Fixed a bug in the expression handling: now > and < are supported as well
 	- Fixed a bug in the from;to;step-style construct
 	- Fixed remote host checking
 	- Added a -D flag to create an empty directory structure

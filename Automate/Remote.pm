@@ -1,7 +1,7 @@
 package Simulation::Automate::Remote;
 
 use vars qw( $VERSION );
-$VERSION = "0.9.6";
+$VERSION = "1.0.0";
 
 #################################################################################
 #                                                                              	#
@@ -119,7 +119,8 @@ close PL;
 #Simple check: create a file with the name of the localhost, and check for its existence over ssh
 my $nfstest="$homepath/$localsynsimpath/$rundir/$localhost";
 system("touch $nfstest");
-my $nonfs=`ssh $remotehost  perl -e 'if(-e $nfstest ){print "0"}else{print "1"}'`;
+#print STDERR qq(ssh $remotehost  perl -e \'if ( -e "$nfstest" ){print "0"}else{print "1"}\');die;
+my $nonfs=`ssh $remotehost  "perl -e 'if ( -e qq($nfstest) ){print 0}else{print 1}'"`;
 if($nonfs) {
 #first time, or at start of run
 #actually, the best way is to create synsim_remote.pl on the fly
@@ -129,7 +130,8 @@ unlink $scriptname;
 #at start of synsim run
 system("ssh $remotehost  perl $scriptname");
 #after synsim run, collect the data
-system("rsync -uva ${remotehost}::home/$user/$remotesynsimpath/$rundir/$simdir .");
+#system("rsync -uva ${remotehost}::home/$user/$remotesynsimpath/$rundir/$simdir .");
+system("scp -C -r ${remotehost}:/local/home/$user/$remotesynsimpath/$rundir/$simdir .");
 } else {
 # In case of NFS homedir, it's simpler:
 system("ssh $remotehost 'cd $homepath/$localsynsimpath/$rundir && ./synsim -p -f $datafile'");
@@ -174,15 +176,18 @@ system("rsync -uva  ${localhost}::home/$user/$localsynsimpath/Simulation .");
 
 if (not -d "$rundir"){mkdir "$rundir" or die $!};
 chdir "$rundir";
-system("rsync -uva  ${localhost}::home/$user/$localsynsimpath/$rundir/SOURCES .");
-system("rsync -uva  ${localhost}::home/$user/$localsynsimpath/$rundir/TEMPLATES .");
-system("rsync -uva  ${localhost}::home/$user/$localsynsimpath/$rundir/synsim .");
-system("rsync -uva  ${localhost}::home/$user/$localsynsimpath/$rundir/$datafile .");
-
+#system("rsync -uva  ${localhost}::home/$user/$localsynsimpath/$rundir/SOURCES .");
+#system("rsync -uva  ${localhost}::home/$user/$localsynsimpath/$rundir/TEMPLATES .");
+#system("rsync -uva  ${localhost}::home/$user/$localsynsimpath/$rundir/synsim .");
+#system("rsync -uva  ${localhost}::home/$user/$localsynsimpath/$rundir/$datafile .");
+system('scp -r -C ${localhost}:$homepath/$user/$localsynsimpath/$rundir/SOURCES .");
+system('scp -r -C ${localhost}:$homepath/$user/$localsynsimpath/$rundir/TEMPLATES .");
+system('scp -r -C ${localhost}:$homepath/$user/$localsynsimpath/$rundir/synsim .");
+system('scp -r -C ${localhost}:$homepath/$user/$localsynsimpath/$rundir/$datafile .");
 #now run synsim
 system("./synsim -v -p -f $datafile");
 
-#to get the results back, we'll rsync from the other side
+#to get the results back, we'll scp from the other side
 
 ENDTEMPL
 }

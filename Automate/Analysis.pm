@@ -1,7 +1,7 @@
 package Simulation::Automate::Analysis;
 
 use vars qw( $VERSION );
-$VERSION = "0.9.6";
+$VERSION = "1.0.0";
 
 #################################################################################
 #                                                                              	#
@@ -66,6 +66,7 @@ sub process_datafile {
 my $binfile=shift;
 my %trend=();
 push @{$trend{DIFF}},0;
+
 open(IN,"<$binfile")||carp "Can't open $binfile: $!\n";
 my $j=0;
 $nlots++;
@@ -84,7 +85,8 @@ while(<IN>) {
 /^\s+$/ && next;
 /^\s*\#/ && next;
 chomp;
-
+s/\s+$//;
+s/^\s+//;
 my @row=split(/[\s\t]+/,$_);
 my $ri=0;
 
@@ -107,9 +109,7 @@ close IN;
 
 if (exists $trend{DIFF}) {
 foreach my $i (0..@{$trend{DIFF}}-2) {
-
 ${$trend{DIFF}}[$i]=${$trend{DIFF}}[$i+1]-${$trend{DIFF}}[$i];
-
 }
 pop @{$trend{DIFF}};
 }
@@ -122,7 +122,7 @@ foreach my $i (0..@{$trend{$logkey}}-1) {
 if(${$trend{$logkey}}[$i]>0){
 ${$trend{$logkey}}[$i]=log(${$trend{$logkey}}[$i])/log(10); 
 } else {
-${$trend{$logkey}}[$i]=''
+${$trend{$logkey}}[$i]='';
 }
 } # each $i
 } # each $logkey
@@ -140,7 +140,9 @@ my $avg=0;
 my $stdev=0;
 my $pct_bad=shift||0; # means we throw 50% of the devices away as outliers to calculate the rough mean
 my $delta=shift||2e10; # means we take all devices within 20% deviation from actual mean 
-my @tmp_values=sort numerical @$value_array_ref;
+
+my @tmp_values=sort numerical @{$value_array_ref};
+
 my $min=$tmp_values[0];
 my $max=$tmp_values[@tmp_values-1];
 #print "#all values:".scalar(@tmp_values)."\n";
@@ -213,14 +215,14 @@ my $value_array_ref=shift;
 # number of bins, number of sigmas for with ofinterval
 my $nbins=shift; 
 my $nsigma=shift;
-my $min=shift||'NOT DEFINED';
-my $max=shift||'NOT DEFINED';
+my $min=shift||'CALC';
+my $max=shift||'CALC';
 
 # calculate mean & sigma and min/max/binwidth
 my ($avg,$stdev)=@{&calc_average($value_array_ref)};
 if(not $nsigma){$nsigma=6}
 #if((not $min) && ($min!=0)){
-if($min=~/N/) { 
+if($min=~/C/) { 
 $min=$avg-$nsigma*$stdev;
 if($stdev>$avg) {
 # in this case take min and max value of set
@@ -228,11 +230,10 @@ $min=${$value_array_ref}[0];
   foreach my $val (@{$value_array_ref}) {
     if($val<$min){$min=$val}
   }
+}
+}
 if($v){print "# MIN:$min\n";}
-}
-}
-
-if( $max=~/N/) { 
+if( $max=~/C/) { 
 $max=$avg+$nsigma*$stdev;
 
 if(1||$stdev>$avg) {
@@ -250,6 +251,7 @@ if($min<0){$min=0;}
 my $binwidth=($max-$min)/$nbins;
 
 ## first sort
+
 my @tmp_values=sort numerical @$value_array_ref;
 my $i=0;
 
@@ -348,7 +350,7 @@ my %hists=();
 
 my $par=$pars[0];
 
-if($v){print "# Processing $par\n";}
+print "# Processing $par\n" if $v;
 
 my @tmpa=@{&build_histogram(\@{$trend{$par}},$nbins,3,$min,$max)};
 my $tmp=$tmpa[0];

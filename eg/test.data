@@ -1,2 +1,7 @@
-TITLE: SynSim test bufsim3
-SIMTYPE : test
+TITLE: Test
+SIMULATION: simop
+COMMAND: ./simopwrapper.sh ../NEW_TEST inputfile outputfile
+OUTPUT_FILTER_PATTERN: delay
+ANALYSIS: XYPlot
+DATACOL:3
+_BERNOULLI= 0.8,0.9,0.95

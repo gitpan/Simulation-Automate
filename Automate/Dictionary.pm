@@ -1,7 +1,7 @@
 package Simulation::Automate::Dictionary;
 
 use vars qw( $VERSION );
-$VERSION = "0.9.6";
+$VERSION = "1.0.0";
 
 #################################################################################
 #                                                                              	#
