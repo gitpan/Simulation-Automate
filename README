@@ -1,0 +1,34 @@
+Simulation/Automate version 0.9.3
+=====================================
+
+Simulation::Automate ('SynSim') is a generic template-driven simulation automation tool. It works with any simulator that accepts text input files and generates text output. It executes thousands of simulations with different input files automatically, and processes the results. Postprocessing facilities include basic statistical analysis and automatic generation of PostScript plots with Gnuplot. SynSim is entirely modular, making it easy to add your own analysis and postprocessing routines.
+
+For more information, read the POD and look at http://www.comms.eee.strath.ac.uk/~wim/synsim.html
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install (or
+   make localinstall
+   for a local installation)
+
+To create your local project setup, you can use
+
+   make setup
+
+DEPENDENCIES
+
+This module requires no other modules, but to make use of the 
+postprocessing facilities, you'll need gnuplot 
+http://www.ucc.ie/gnuplot/gnuplot.html
+
+
+COPYRIGHT AND LICENCE
+
+Copyright (c) 2000,2002-2003 Wim Vanderbauwhede. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+

@@ -1,0 +1,93 @@
+# WV Tue Oct  1 14:49:44 BST 2002
+# $Id: ErrorFlags.data,v 1.2 2002/10/01 14:10:06 wim Exp $
+# This is the general template for the input data file for the OPSnet SynSim script.
+# Conventions:
+# lists of values for parameters are comma-separated
+# lists of values for the parameters in a set of curvers are semicolumn (;) separated. The shortcut '..' is allowed provided that the values are integers
+# When using more than one set, they al must have the same number of elements. THis is because the corresponding elements are combined. eg:
+# _SET1 = 1;2;3
+# _SET2 = 4;5;6
+# This gives 3 simulations with resp. (1,4),(2,5) and (3,6).
+# Lines starting with '#' and blank lines are ignored
+# Lines starting with an underscore (_) are supposed to have following synstax:
+# _NAME = VALUE1 [,VALUE2[,..,VALUEn]]
+# The script will do a 'for'-loop over every parameter with more than one value. As a consequence,
+# DEVTYPE can have only 1 argument.
+# For every value of _SIMTYPE, the corresponding section must be present e.g.:
+# bufsim3
+# _SAMPL = ...;...
+# Make sure the SIMTYPE does not have an underscore, otherwise it's considered as a parameter, not a value.
+#
+# The TITLE statement is not a parameter, it's just a title to be used in the reports
+#
+# Unix is case dependent!
+#
+
+TITLE: Packet Loss vs Buffer Depth
+SIMTYPE : bufsim3
+DEVTYPE : OPSnode
+TEMPL : .templ
+# the program that runs the input file
+COMMAND : perl inputfile outputfile
+# To filter the output of the simulation
+#if not specified, defaults to DEVTYPE
+OUTPUT_FILTER_PATTERN : .*
+# Name of the template file for the result analysis
+ANALYSIS_TEMPLATE : ErrorFlags
+SWEEPVAR : _NBUFS
+NORMVAR : _NPACK
+# assuming the raw output comes in whitespace-separated columns
+DATACOL: 4
+#logscale : x, y or xy
+LOGSCALE: Y
+YLABEL: Packet loss
+
+# number of packets to be generated
+_NPACK = 1000000
+# number of ports
+_NPORTS = 2
+#-----------------------------------------------------------------------------
+# traffic distribution type: Poisson, Pareto, Uniform
+_TRAFDIST = 0 #,1,2
+# minimum gap width
+_MINGW = 400
+# mean  gap width
+_MEANGW = 800
+#-----------------------------------------------------------------------------
+# packet length distribution type: uniform, Ethernet, IP, all MIN, all MAX
+_PLDIST = 2
+# for _PLDIST = 0..5
+_NBITSH = 50
+# unit packet length  50*8 bits, and a timestep is a bit
+_UNITPL = 400
+# max number of units
+_NMAX = 30
+# intermediate number of units. if 0 or not defined, will be calculated
+_NMED = 0
+# for _PLDIST = 5
+_FRACT_MIN = 0.7
+#-----------------------------------------------------------------------------
+# number of buffers
+_NBUFS = 16,24,32,40,48,64
+# type of buffer
+# 0: adjustable; 1: fixed length; 2: multi-exit
+_BUFTYPE = 2
+# the output mux of the buffer can be blocking or non-blocking
+_BLOCKING = 0
+# "gap" between head and tail of packet in circulating buffer
+_MINBGW = 100
+# keep packet order
+_KEEP_ORDER = 0,1
+#-----------------------------------------------------------------------------
+# Contention probability. If not 0 or not defined, will artificially set contention rate.
+_CONTENTION_PROB = 0
+# Sampling factor to speed up simulation with a factor UNITPL/SAMPL
+_SAMPL = 50
+#verbose or not
+_VERBOSE = 0
+# to analyse the generated traffic
+_ONLY_TRAFFIC = 0
+# generate data for histograms
+_HISTS = 0
+# size of population
+_POP_SAMPLE = 1..20

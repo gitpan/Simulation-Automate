@@ -1,0 +1,27 @@
+Revision history for Perl extension Simulation::Automate (was Simulation::Tools::SynSim).
+
+0.9.3  Thu Jan  9 15:14:59 GMT 2003
+	- Changed name to Simulation::Automate
+	- Changed Makefile.PL to include localinstall target
+	- Some fixes for undefined variables, to avoid warnings
+	- added synsim-mode.el (Color highlighting of SynSim data files for XEmacs) to eg/
+
+0.9.2  Wed Nov 13 16:14:50 GMT 2002
+	- fixed Makefile.PL: 
+	9,12c9,12
+	<    ($] >= 5.005 ?   ## Add these new keywords supported since 5.005
+	<     ('ABSTRACT' => 'Simulation Automation Tool', 
+	<     'AUTHOR'   => 'Wim Vanderbauwhede <wim@motherearth.org>') : ()),
+	< 
+	---
+	>    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
+	>     'ABSTRACT'=> 'Simulation Automation Tool', 
+	>     'AUTHOR'     => 'Wim Vanderbauwhede <wim@motherearth.org>') : ()),
+	> ,
+	- fixed some warnings in PostProcLibs.pm due to words not defined in Dictionary
+	- removed non-generic routines from PostProcessors.pm
+
+0.9.1  Mon Nov 11 13:48:31 2002
+	- original version; created by h2xs 1.21 with options
+		-X -n Simulation::Tools::SynSim
+
