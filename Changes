@@ -1,5 +1,22 @@
 Revision history for Perl extension Simulation::Automate (was Simulation::Tools::SynSim).
 
+0.9.6  Thu Sep  4 10:56:45 BST 2003
+	- Fixed a bug in the expression handling: now > and < are supported as well
+	- Fixed a bug in the from;to;step-style construct
+	- Fixed remote host checking
+	- Added a -D flag to create an empty directory structure
+	- See Simulation-Automate.diff for all changes
+
+0.9.5  Mon Jul  7 15:06:51 BST 2003
+	- Flags: -i now implies -v -p; -f is now optional; -N now works as it should; -P is a new convenience flag to just plot results.
+	- The list syntax in the datafile has been extended with a from;to;step-style construct
+	- The distinction between simulation variables, configuration variables and variables for use in the postprocessing modules is now more clear. As a result, _POP_SAMPLE is now obsolete and replaced by NRUNS. Read the POD for details. 
+	- There are now hooks in the generic postprocessing routines. You can now provide your own simple routines to modify the result files in place before handing them to the postprocessing routines. See the POD.
+	- There is a new generic postprocessing routine which allows conditional plots. See the POD.
+	- SynSim now makes it easy to run on a remote host.
+	- Under the hood, a lot has changed. The next release, 1.0, will introduce self-documenting names for the result files, and as a result slightly break compatibility (for those using -N only).
+	- See Simulation-Automate.diff for all changes
+
 0.9.4  Mon Apr  7 16:04:18 BST 2003
 	- Added support for expressions in datafile
 	- Postprocessing routines ErrorFlags and Histogram are now generic

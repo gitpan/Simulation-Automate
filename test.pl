@@ -11,4 +11,3 @@ use Simulation::Automate;
 chdir "eg";
 ok(&synsim("test.data"));
 
-

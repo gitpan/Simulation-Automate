@@ -1,13 +1,17 @@
+Automate.html
 Automate.pm
 Automate/Analysis.pm
 Automate/Dictionary.pm
 Automate/Main.pm
 Automate/PostProcLib.pm
 Automate/PostProcessors.pm
+Automate/Remote.pm
 Changes
-MANIFEST
+MANIFEST			This list of files
 Makefile.PL
 README
+Simulation-Automate.diff
+bin/synsim
 eg/ErrorFlags.data
 eg/Expressions.data
 eg/Histogram.data
@@ -15,6 +19,7 @@ eg/SOURCES/MersenneTwister.h
 eg/SOURCES/bufsim3.cc
 eg/SweepVar.data
 eg/TEMPLATES/SIMTYPES/bufsim3.templ
+eg/example.data
 eg/gnuplot.data
 eg/synsim
 eg/synsim-mode.el

@@ -59,6 +59,7 @@ my $datafile=shift||'synsim.data';
 my @flags=my ($batch,$interactive,$nosims,$plot,$verbose,$warn)=@{&preprocess_commandline($datafile)};
 my $dataset=$datafile;
 $dataset=~s/\.data//;
+
 print STDERR "\nCreating Loops.pm...\n" if $verbose;
 
 my $dataref=&allow_multiple_sims($datafile);
@@ -84,7 +85,7 @@ return 1;
 ##
 ################################################################################
 
-sub preprocess_commandline {
+sub preprocess_commandline { 
 my $datafile=$_[0];
 my ($batch,$interactive,$nosims,$plot,$verbose,$warn,$justplot)=(0,0,0,0,0,0,0);
 my $default=1;
@@ -104,7 +105,7 @@ my $dtf=0;
       if(/-P/){$justplot=1;next}
       if(/-D/) {
 	(not -d 'TEMPLATES') && mkdir 'TEMPLATES';
-	(not -d 'TEMPLATES/SIMTYPES') && mkdir 'TEMPLATES/SIMTYPES';
+	(not -d 'TEMPLATES/SIMTYPES') && mkdir 'TEMPLATES/DEVTYPES';
 	(not -d 'TEMPLATES/DEVTYPES') && mkdir 'TEMPLATES/DEVTYPES';
 	(not -d 'SOURCES') && mkdir 'SOURCES';
 	die "An empty directory structure has been created\n";
@@ -174,6 +175,7 @@ chdir "${simtype}-$datafile";
 system("ggv ${simtype}-$anatype.ps");
 die "Done\n";
 }
+
 return [$batch,$interactive,$nosims,$plot,$verbose,$warn];
 } #END of preprocess_commandline
 
@@ -634,7 +636,6 @@ require "./Loops_$dataset.pm";
 #eval("
 #use Loops_$dataset;
 #");
-
 my $simref=shift;
 my @flags=@{shift(@_)};
 my $nosims=$flags[2];
@@ -701,7 +702,9 @@ print STDERR "#\n" if $verbose;
 print STDERR "# Simulation type: $sim, device dir ".`pwd`."#\n" if $verbose;
 print STDERR "#" x 80,"\n" if $verbose;
 
+print STDERR"eval('&Loops_'.$dataset.'::execute_'.$sim.'_loop($dataset,\@flags);');\n";
 eval('&Loops_'.$dataset.'::execute_'.$sim.'_loop($dataset,\@flags);');
+
 
 } #sims
 return 1;
